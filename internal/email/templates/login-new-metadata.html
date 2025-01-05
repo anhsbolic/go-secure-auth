@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login New Metadata</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <h1>Login from New Device or Location</h1>
+        <p>Hi {{.Name}},</p>
+        <p>You are Login in new Device or Location</p>
+        <p>User Agent : {{.UserAgent}}</p>
+        <p>IP Address : {{.IPAddress}}</p>
+        <p>Report if you did not Login</p>
+    </div>
+</div>
+</body>
+</html>

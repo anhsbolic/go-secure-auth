@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .content {
+            text-align: center;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 15px 25px;
+            margin-top: 20px;
+            color: #fff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <h1>Email Verification</h1>
+        <p>Hi {{.Name}},</p>
+        <p>Thank you for registering! Please verify your email address to activate your account.</p>
+        <a href="{{.VerificationURL}}" class="button">Verify Email</a>
+        <p>If you did not sign up for an account, please ignore this email.</p>
+    </div>
+</div>
+</body>
+</html>
