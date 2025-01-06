@@ -6,9 +6,11 @@ import (
 )
 
 const (
-	ActivityLogLogin    = "login"
-	ActivityLogLoggedIn = "logged in"
-	ActivityLogLogout   = "logout"
+	ActivityLogLogin          = "login"
+	ActivityLogLoggedIn       = "logged_in"
+	ActivityLogLogout         = "logout"
+	ActivityLogLogoutAll      = "logout_all"
+	ActivityLogChangePassword = "change_password"
 )
 
 type ActivityLog struct {

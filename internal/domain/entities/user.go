@@ -10,7 +10,6 @@ const (
 	UserStatusActive   = "active"
 	UserStatusInactive = "inactive"
 	UserStatusBlocked  = "blocked"
-	UserRoleAdmin      = "admin"
 	UserRoleMember     = "member"
 )
 

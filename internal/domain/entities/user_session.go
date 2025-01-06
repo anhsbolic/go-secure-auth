@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-const (
-	UserSessionTypeEmailVerification = "email_verification"
-	UserSessionTypeResetPassword     = "reset_password"
-)
-
 type UserSession struct {
 	ID            uuid.UUID    `db:"id"`
 	SessionID     uuid.UUID    `db:"session_id"`

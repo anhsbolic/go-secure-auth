@@ -35,6 +35,7 @@ type AuthHelper interface {
 	GenerateLoginOTP() string
 	SendLoginOTPEmail(mailAddress string, username string, loginOTP string) error
 	SendLoginNewMetadataEmail(mailAddress string, username string, userAgent string, ipAddress string) error
+	ParseRefreshAccessToken(refreshAccessToken string) (string, error)
 }
 
 type authHelper struct{}
@@ -133,8 +134,8 @@ func (h *authHelper) SendVerificationEmail(mailAddress string, username string, 
 	}
 
 	// set email data
-	webURL := config.GetConfig().WebURL
-	verificationUrl := fmt.Sprintf("%s/auth/verify-email?email=%s&token=%s", webURL, mailAddress, verificationToken)
+	studentWebUrl := config.GetConfig().WebURL
+	verificationUrl := fmt.Sprintf("%s/auth/verify-email?email=%s&token=%s", studentWebUrl, mailAddress, verificationToken)
 	mailData := email.VerificationEmailData{
 		Name:            username,
 		VerificationURL: verificationUrl,
@@ -172,8 +173,8 @@ func (h *authHelper) SendPasswordResetEmail(mailAddress string, username string,
 	}
 
 	// set email data
-	webURL := config.GetConfig().WebURL
-	resetUrl := fmt.Sprintf("%s/auth/reset-password?email=%s&token=%s", webURL, mailAddress, resetToken)
+	studentWebUrl := config.GetConfig().WebURL
+	resetUrl := fmt.Sprintf("%s/auth/reset-password?email=%s&token=%s", studentWebUrl, mailAddress, resetToken)
 	mailData := email.ResetEmailData{
 		Name:     username,
 		ResetURL: resetUrl,
@@ -305,6 +306,29 @@ func (h *authHelper) SendLoginNewMetadataEmail(mailAddress string, username stri
 	}
 
 	return nil
+}
+
+func (h *authHelper) ParseRefreshAccessToken(refreshAccessToken string) (string, error) {
+	// Get Configs
+	cfg := config.GetConfig()
+	JWTSecretKey := []byte(cfg.JWTSecretKey)
+
+	// Parse Token
+	token, err := jwt.Parse(refreshAccessToken, func(token *jwt.Token) (interface{}, error) {
+		return JWTSecretKey, nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	// Validate Token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", errors.New("invalid token")
+	}
+
+	// Return refresh UUID
+	return claims["jti"].(string), nil
 }
 
 func NewAuthHelper() AuthHelper {

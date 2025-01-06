@@ -26,3 +26,12 @@ type VerifyLoginRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=32"`
 	Otp      string `json:"otp" validate:"required,min=6,max=6"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password" validate:"required,min=8,max=32"`
+	NewPassword string `json:"new_password" validate:"required,min=8,max=32"`
+}
+
+type LogoutRequest struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}

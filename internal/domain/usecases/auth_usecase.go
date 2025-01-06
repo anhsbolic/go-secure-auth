@@ -23,8 +23,13 @@ type AuthUseCase interface {
 	VerifyEmail(ctx context.Context, email string, token string) error
 	ForgotPassword(ctx context.Context, body dto.ForgotPasswordRequest) error
 	ResetPassword(ctx context.Context, body dto.ResetPasswordRequest) error
-	Login(ctx context.Context, body dto.LoginRequest) error
-	VerifyLogin(ctx context.Context, body dto.VerifyLoginRequest) (dto.VerifyLoginResponse, error)
+	Login(ctx context.Context, fingerPrint dto.FingerPrint, body dto.LoginRequest) error
+	VerifyLogin(ctx context.Context, fingerPrint dto.FingerPrint, body dto.VerifyLoginRequest) (dto.VerifyLoginResponse, error)
+	RefreshAccessToken(ctx context.Context, userID string, sessionID string) (dto.RefreshAccessTokenResponse, error)
+	GetUserDetail(ctx context.Context, userID string) (dto.UserDetailResponse, error)
+	ChangePassword(ctx context.Context, userID string, fingerPrint dto.FingerPrint, body dto.ChangePasswordRequest) error
+	Logout(ctx context.Context, userID string, sessionID string, fingerPrint dto.FingerPrint, body dto.LogoutRequest) error
+	LogoutAll(ctx context.Context, userID string, sessionID string, fingerPrint dto.FingerPrint, body dto.LogoutRequest) error
 }
 
 type serviceUserUseCase struct {
@@ -378,7 +383,7 @@ func (u serviceUserUseCase) ResetPassword(ctx context.Context, body dto.ResetPas
 	return nil
 }
 
-func (u serviceUserUseCase) Login(ctx context.Context, body dto.LoginRequest) error {
+func (u serviceUserUseCase) Login(ctx context.Context, fingerPrint dto.FingerPrint, body dto.LoginRequest) error {
 	// validate request
 	if err := u.Validate.Struct(body); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
@@ -416,30 +421,26 @@ func (u serviceUserUseCase) Login(ctx context.Context, body dto.LoginRequest) er
 		return fiber.NewError(fiber.StatusTooManyRequests, maxLoginAttemptsExceeded)
 	}
 
-	// get user agent & ip address
-	userAgent := ctx.Value("user-agent").(string)
-	ipAddress := ctx.Value("ip-address").(string)
-
 	// encrypt user agent
-	encryptedUserAgent, err := u.AuthHelper.EncryptText(userAgent)
+	encryptedUserAgent, err := u.AuthHelper.EncryptText(fingerPrint.UserAgent)
 	if err != nil {
 		return fmt.Errorf("[%s|Login] %s: %w", authUN, errEncryptText, err)
 	}
 
 	// hash user agent
-	hashUserAgent, err := u.AuthHelper.HashText(userAgent)
+	hashUserAgent, err := u.AuthHelper.HashText(fingerPrint.UserAgent)
 	if err != nil {
 		return fmt.Errorf("[%s|Login] %s: %w", authUN, errHashText, err)
 	}
 
 	// encrypt ip address
-	encryptedIPAddress, err := u.AuthHelper.EncryptText(ipAddress)
+	encryptedIPAddress, err := u.AuthHelper.EncryptText(fingerPrint.IpAddress)
 	if err != nil {
 		return fmt.Errorf("[%s|Login] %s: %w", authUN, errEncryptText, err)
 	}
 
 	// hash ip address
-	hashIPAddress, err := u.AuthHelper.HashText(ipAddress)
+	hashIPAddress, err := u.AuthHelper.HashText(fingerPrint.IpAddress)
 	if err != nil {
 		return fmt.Errorf("[%s|Login] %s: %w", authUN, errHashText, err)
 	}
@@ -559,7 +560,7 @@ func (u serviceUserUseCase) Login(ctx context.Context, body dto.LoginRequest) er
 	return nil
 }
 
-func (u serviceUserUseCase) VerifyLogin(ctx context.Context, body dto.VerifyLoginRequest) (dto.VerifyLoginResponse, error) {
+func (u serviceUserUseCase) VerifyLogin(ctx context.Context, fingerPrint dto.FingerPrint, body dto.VerifyLoginRequest) (dto.VerifyLoginResponse, error) {
 	// init empty result
 	var result dto.VerifyLoginResponse
 
@@ -600,30 +601,26 @@ func (u serviceUserUseCase) VerifyLogin(ctx context.Context, body dto.VerifyLogi
 		return result, fiber.NewError(fiber.StatusTooManyRequests, maxLoginAttemptsExceeded)
 	}
 
-	// get user agent & ip address
-	userAgent := ctx.Value("user-agent").(string)
-	ipAddress := ctx.Value("ip-address").(string)
-
 	// encrypt user agent
-	encryptedUserAgent, err := u.AuthHelper.EncryptText(userAgent)
+	encryptedUserAgent, err := u.AuthHelper.EncryptText(fingerPrint.UserAgent)
 	if err != nil {
 		return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errEncryptText, err)
 	}
 
 	// hash user agent
-	hashUserAgent, err := u.AuthHelper.HashText(userAgent)
+	hashUserAgent, err := u.AuthHelper.HashText(fingerPrint.UserAgent)
 	if err != nil {
 		return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errHashText, err)
 	}
 
 	// encrypt ip address
-	encryptedIPAddress, err := u.AuthHelper.EncryptText(ipAddress)
+	encryptedIPAddress, err := u.AuthHelper.EncryptText(fingerPrint.IpAddress)
 	if err != nil {
 		return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errEncryptText, err)
 	}
 
 	// hash ip address
-	hashIPAddress, err := u.AuthHelper.HashText(ipAddress)
+	hashIPAddress, err := u.AuthHelper.HashText(fingerPrint.IpAddress)
 	if err != nil {
 		return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errHashText, err)
 	}
@@ -796,7 +793,12 @@ func (u serviceUserUseCase) VerifyLogin(ctx context.Context, body dto.VerifyLogi
 			return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errDecryptText, txErr)
 		}
 
-		txErr = u.AuthHelper.SendLoginNewMetadataEmail(decryptedUserEmail, decryptedUsername, userAgent, ipAddress)
+		txErr = u.AuthHelper.SendLoginNewMetadataEmail(
+			decryptedUserEmail,
+			decryptedUsername,
+			fingerPrint.UserAgent,
+			fingerPrint.IpAddress,
+		)
 		if txErr != nil {
 			return result, fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errSendEmail, txErr)
 		}
@@ -806,6 +808,355 @@ func (u serviceUserUseCase) VerifyLogin(ctx context.Context, body dto.VerifyLogi
 	result.AccessToken = userSessionJWT.AccessToken
 	result.RefreshToken = userSessionJWT.RefreshToken
 	return result, nil
+}
+
+func (u serviceUserUseCase) RefreshAccessToken(ctx context.Context, userID string, sessionID string) (dto.RefreshAccessTokenResponse, error) {
+	// init empty result
+	var result dto.RefreshAccessTokenResponse
+
+	// get user session by user id and session id
+	userSession, err := u.UserSessionRepository.FindOneBySessionId(ctx, u.DB, userID, sessionID)
+	if err != nil {
+		if errors.Is(err, dbErrors.DBErrNotFound) {
+			return result, fiber.NewError(fiber.StatusUnprocessableEntity, invalidRefreshTokenData)
+		}
+		return result, fmt.Errorf("[%s|RefreshAccessToken] %s: %w", authUN, errFindUserSession, err)
+	}
+
+	// refresh session data
+	userSession.AccessUUID = uuid.New()
+	userSession.RefreshUUID = uuid.New()
+	userSession.ExpiresAt = u.AuthHelper.GetSessionExpirationTime()
+	userSession.UpdatedAt = sql.NullTime{Time: time.Now(), Valid: true}
+
+	// generate new access token
+	userSessionJWT, err := u.AuthHelper.GenerateUserSessionJWT(userSession)
+	if err != nil {
+		return result, fmt.Errorf("[%s|RefreshAccessToken] %s: %w", authUN, errGenerateJWT, err)
+	}
+
+	// Init Db Transaction
+	tx, txErr := u.DB.BeginTxx(ctx, nil)
+	if txErr != nil {
+		return result, fmt.Errorf("[%s|RefreshAccessToken] %s: %w", authUN, errBeginTx, txErr)
+	}
+	defer dbHelpers.DbCommitOrRollback(tx, &txErr)
+
+	// update user session
+	txErr = u.UserSessionRepository.RefreshSession(ctx, tx, userSession)
+	if txErr != nil {
+		return result, fmt.Errorf("[%s|RefreshAccessToken] %s: %w", authUN, errRefreshUserSession, txErr)
+	}
+
+	// return
+	result.AccessToken = userSessionJWT.AccessToken
+	result.RefreshToken = userSessionJWT.RefreshToken
+	return result, nil
+}
+
+func (u serviceUserUseCase) GetUserDetail(ctx context.Context, userID string) (dto.UserDetailResponse, error) {
+	// init empty result
+	var result dto.UserDetailResponse
+
+	// get user by id
+	user, err := u.UserRepository.FindOneByID(ctx, u.DB, userID)
+	if err != nil {
+		if errors.Is(err, dbErrors.DBErrNotFound) {
+			return result, fiber.NewError(fiber.StatusNotFound, userNotFound)
+		}
+		return result, fmt.Errorf("[%s|GetUserDetail] %s: %w", authUN, errFindUser, err)
+	}
+
+	// decrypt username
+	decryptedUsername, err := u.AuthHelper.DecryptText(user.Username)
+	if err != nil {
+		return result, fmt.Errorf("[%s|GetUserDetail] %s: %w", authUN, errDecryptText, err)
+	}
+
+	// decrypt email
+	decryptedEmail, err := u.AuthHelper.DecryptText(user.Email)
+	if err != nil {
+		return result, fmt.Errorf("[%s|GetUserDetail] %s: %w", authUN, errDecryptText, err)
+	}
+
+	// return
+	result.ID = user.ID
+	result.Username = decryptedUsername
+	result.Email = decryptedEmail
+	result.Role = user.Role
+	result.Status = user.Status
+	return result, nil
+}
+
+func (u serviceUserUseCase) ChangePassword(ctx context.Context, userID string, fingerPrint dto.FingerPrint, body dto.ChangePasswordRequest) error {
+	// validate request
+	if err := u.Validate.Struct(body); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	// encrypt user agent
+	encryptedUserAgent, err := u.AuthHelper.EncryptText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash user agent
+	hashUserAgent, err := u.AuthHelper.HashText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errHashText, err)
+	}
+
+	// encrypt ip address
+	encryptedIPAddress, err := u.AuthHelper.EncryptText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash ip address
+	hashIPAddress, err := u.AuthHelper.HashText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|VerifyLogin] %s: %w", authUN, errHashText, err)
+	}
+
+	// get user by id
+	user, err := u.UserRepository.FindOneByID(ctx, u.DB, userID)
+	if err != nil {
+		if errors.Is(err, dbErrors.DBErrNotFound) {
+			return fiber.NewError(fiber.StatusNotFound, userNotFound)
+		}
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errFindUser, err)
+	}
+
+	// check password
+	isPasswordValid := u.AuthHelper.ComparePassword(user.PasswordHash, body.OldPassword)
+	if !isPasswordValid {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, invalidOldPassword)
+	}
+
+	// validate new password
+	err = u.AuthHelper.ValidatePassword(body.NewPassword)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, invalidNewPassword)
+	}
+
+	// bcrypt password
+	hashedNewPassword, err := u.AuthHelper.BcryptPassword(body.NewPassword)
+	if err != nil {
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errHashPassword, err)
+	}
+
+	// Init DB Transaction
+	tx, txErr := u.DB.BeginTxx(ctx, nil)
+	if txErr != nil {
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errBeginTx, txErr)
+	}
+	defer dbHelpers.DbCommitOrRollback(tx, &txErr)
+
+	// update user password
+	txErr = u.UserRepository.UpdatePassword(ctx, tx, entities.UpdatePasswordUser{
+		ID:           user.ID,
+		PasswordHash: hashedNewPassword,
+		UpdatedAt:    time.Now(),
+	})
+	if txErr != nil {
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errUpdateUser, txErr)
+	}
+
+	// save activity log
+	txErr = u.ActivityLogRepository.CreateTx(ctx, tx, entities.ActivityLog{
+		UserID:        user.ID,
+		UserAgent:     encryptedUserAgent,
+		UserAgentHash: hashUserAgent,
+		IPAddress:     encryptedIPAddress,
+		IPAddressHash: hashIPAddress,
+		Activity:      entities.ActivityLogChangePassword,
+		ActivityTime:  sql.NullTime{Time: time.Now(), Valid: true},
+		Description:   sql.NullString{String: userChangedPassword, Valid: true},
+		CreatedAt:     sql.NullTime{Time: time.Now(), Valid: true},
+	})
+	if txErr != nil {
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errCreateActivityLog, txErr)
+	}
+
+	// revoke all sessions
+	txErr = u.UserSessionRepository.RevokeSessionsByUserID(ctx, tx, user.ID.String())
+	if txErr != nil {
+		return fmt.Errorf("[%s|ChangePassword] %s: %w", authUN, errRevokeUserSessions, txErr)
+	}
+
+	return nil
+}
+
+func (u serviceUserUseCase) Logout(ctx context.Context, userID string, sessionID string, fingerPrint dto.FingerPrint, body dto.LogoutRequest) error {
+	// validate request
+	if err := u.Validate.Struct(body); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	// check user
+	isUserValid, err := u.UserRepository.CheckByID(ctx, u.DB, userID)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errCheckUser, err)
+	}
+	if !isUserValid {
+		return fiber.NewError(fiber.StatusNotFound, userNotFound)
+	}
+
+	// parse refresh token
+	refreshUUID, err := u.AuthHelper.ParseRefreshAccessToken(body.RefreshToken)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, invalidLogoutData)
+	}
+
+	// get user session by user id, session id, and refresh UUID
+	userSession, err := u.UserSessionRepository.FindOneBySessionIDAndRefreshUUID(ctx, u.DB, userID, sessionID, refreshUUID)
+	if err != nil {
+		if errors.Is(err, dbErrors.DBErrNotFound) {
+			return fiber.NewError(fiber.StatusUnprocessableEntity, invalidLogoutData)
+		}
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errFindUserSession, err)
+	}
+
+	// encrypt user agent
+	encryptedUserAgent, err := u.AuthHelper.EncryptText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash user agent
+	hashUserAgent, err := u.AuthHelper.HashText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errHashText, err)
+	}
+
+	// encrypt ip address
+	encryptedIPAddress, err := u.AuthHelper.EncryptText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash ip address
+	hashIPAddress, err := u.AuthHelper.HashText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errHashText, err)
+	}
+
+	// Init DB Transaction
+	tx, txErr := u.DB.BeginTxx(ctx, nil)
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errBeginTx, txErr)
+	}
+	defer dbHelpers.DbCommitOrRollback(tx, &txErr)
+
+	// revoke session
+	txErr = u.UserSessionRepository.RevokeSessionByID(ctx, tx, userSession.ID.String())
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errRevokeUserSession, txErr)
+	}
+
+	// save logout activity
+	txErr = u.ActivityLogRepository.CreateTx(ctx, tx, entities.ActivityLog{
+		UserID:        userSession.UserID,
+		UserAgent:     encryptedUserAgent,
+		UserAgentHash: hashUserAgent,
+		IPAddress:     encryptedIPAddress,
+		IPAddressHash: hashIPAddress,
+		Activity:      entities.ActivityLogLogout,
+		ActivityTime:  sql.NullTime{Time: time.Now(), Valid: true},
+		Description:   sql.NullString{String: userLoggedOut, Valid: true},
+		CreatedAt:     sql.NullTime{Time: time.Now(), Valid: true},
+	})
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errCreateActivityLog, txErr)
+	}
+
+	return nil
+}
+
+func (u serviceUserUseCase) LogoutAll(ctx context.Context, userID string, sessionID string, fingerPrint dto.FingerPrint, body dto.LogoutRequest) error {
+	// validate request
+	if err := u.Validate.Struct(body); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	// check user
+	isUserValid, err := u.UserRepository.CheckByID(ctx, u.DB, userID)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errCheckUser, err)
+	}
+	if !isUserValid {
+		return fiber.NewError(fiber.StatusNotFound, userNotFound)
+	}
+
+	// parse refresh token
+	refreshUUID, err := u.AuthHelper.ParseRefreshAccessToken(body.RefreshToken)
+	if err != nil {
+		return fiber.NewError(fiber.StatusUnprocessableEntity, invalidLogoutData)
+	}
+
+	// get user session by user id, session id, and refresh UUID
+	userSession, err := u.UserSessionRepository.FindOneBySessionIDAndRefreshUUID(ctx, u.DB, userID, sessionID, refreshUUID)
+	if err != nil {
+		if errors.Is(err, dbErrors.DBErrNotFound) {
+			return fiber.NewError(fiber.StatusUnprocessableEntity, invalidLogoutData)
+		}
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errFindUserSession, err)
+	}
+
+	// encrypt user agent
+	encryptedUserAgent, err := u.AuthHelper.EncryptText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash user agent
+	hashUserAgent, err := u.AuthHelper.HashText(fingerPrint.UserAgent)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errHashText, err)
+	}
+
+	// encrypt ip address
+	encryptedIPAddress, err := u.AuthHelper.EncryptText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errEncryptText, err)
+	}
+
+	// hash ip address
+	hashIPAddress, err := u.AuthHelper.HashText(fingerPrint.IpAddress)
+	if err != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errHashText, err)
+	}
+
+	// Init DB Transaction
+	tx, txErr := u.DB.BeginTxx(ctx, nil)
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errBeginTx, txErr)
+	}
+	defer dbHelpers.DbCommitOrRollback(tx, &txErr)
+
+	// revoke session
+	txErr = u.UserSessionRepository.RevokeSessionsByUserID(ctx, tx, userSession.UserID.String())
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errRevokeUserSessions, txErr)
+	}
+
+	// save logout activity
+	txErr = u.ActivityLogRepository.CreateTx(ctx, tx, entities.ActivityLog{
+		UserID:        userSession.UserID,
+		UserAgent:     encryptedUserAgent,
+		UserAgentHash: hashUserAgent,
+		IPAddress:     encryptedIPAddress,
+		IPAddressHash: hashIPAddress,
+		Activity:      entities.ActivityLogLogoutAll,
+		ActivityTime:  sql.NullTime{Time: time.Now(), Valid: true},
+		Description:   sql.NullString{String: userLoggedOutAll, Valid: true},
+		CreatedAt:     sql.NullTime{Time: time.Now(), Valid: true},
+	})
+	if txErr != nil {
+		return fmt.Errorf("[%s|Logout] %s: %w", authUN, errCreateActivityLog, txErr)
+	}
+
+	return nil
 }
 
 func NewAuthUseCase(

@@ -15,7 +15,11 @@ import (
 type UserSessionRepository interface {
 	Create(ctx context.Context, tx *sqlx.Tx, userSession entities.UserSession) (entities.UserSession, error)
 	RefreshSession(ctx context.Context, tx *sqlx.Tx, userSession entities.UserSession) error
+	RevokeSessionByID(ctx context.Context, tx *sqlx.Tx, id string) error
+	RevokeSessionsByUserID(ctx context.Context, tx *sqlx.Tx, userID string) error
 	FindOneByMetadata(ctx context.Context, db *sqlx.DB, metadata entities.UserSessionMetadata) (entities.UserSession, error)
+	FindOneBySessionId(ctx context.Context, db *sqlx.DB, userID string, sessionID string) (entities.UserSession, error)
+	FindOneBySessionIDAndRefreshUUID(ctx context.Context, db *sqlx.DB, userID string, sessionID string, refreshUUID string) (entities.UserSession, error)
 }
 
 type userSessionRepository struct{}
@@ -85,6 +89,28 @@ func (r *userSessionRepository) RefreshSession(ctx context.Context, tx *sqlx.Tx,
 	return nil
 }
 
+func (r *userSessionRepository) RevokeSessionByID(ctx context.Context, tx *sqlx.Tx, id string) error {
+	query := `UPDATE user_sessions SET revoked_at = NOW(), updated_at = NOW() WHERE id = $1 AND deleted_at IS NULL`
+	_, err := tx.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("[%s|RevokeSessionByID] %s: %w", usSnRN, errExecQuery, err)
+	}
+
+	return nil
+}
+
+func (r *userSessionRepository) RevokeSessionsByUserID(ctx context.Context, tx *sqlx.Tx, userID string) error {
+	query := `UPDATE user_sessions SET revoked_at = NOW(), updated_at = NOW() 
+                     WHERE user_id = $1 AND revoked_at IS NULL AND deleted_at IS NULL`
+
+	_, err := tx.ExecContext(ctx, query, userID)
+	if err != nil {
+		return fmt.Errorf("[%s|RevokeSessionsByUserID] %s: %w", usSnRN, errExecQuery, err)
+	}
+
+	return nil
+}
+
 func (r *userSessionRepository) FindOneByMetadata(ctx context.Context, db *sqlx.DB, metadata entities.UserSessionMetadata) (entities.UserSession, error) {
 	query := `SELECT * FROM user_sessions 
          WHERE user_id = $1
@@ -99,6 +125,44 @@ func (r *userSessionRepository) FindOneByMetadata(ctx context.Context, db *sqlx.
 			return entities.UserSession{}, dbErrors.DBErrNotFound
 		}
 		return entities.UserSession{}, fmt.Errorf("[%s|FindOneByMetadata] %s: %w", usSnRN, errExecQuery, err)
+	}
+
+	return userSession, nil
+}
+
+func (r *userSessionRepository) FindOneBySessionId(ctx context.Context, db *sqlx.DB, userID string, sessionID string) (entities.UserSession, error) {
+	query := `SELECT * FROM user_sessions 
+		 WHERE user_id = $1
+		   AND session_id = $2 
+		   AND deleted_at IS NULL`
+
+	var userSession entities.UserSession
+	err := db.GetContext(ctx, &userSession, query, userID, sessionID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entities.UserSession{}, dbErrors.DBErrNotFound
+		}
+		return entities.UserSession{}, fmt.Errorf("[%s|FindOneBySessionId] %s: %w", usSnRN, errExecQuery, err)
+	}
+
+	return userSession, nil
+}
+
+func (r *userSessionRepository) FindOneBySessionIDAndRefreshUUID(ctx context.Context, db *sqlx.DB, userID string, sessionID string, refreshUUID string) (entities.UserSession, error) {
+	query := `SELECT * FROM user_sessions 
+		 WHERE user_id = $1
+		   AND session_id = $2
+		   AND refresh_uuid = $3
+		   AND revoked_at IS NULL
+		   AND deleted_at IS NULL`
+
+	var userSession entities.UserSession
+	err := db.GetContext(ctx, &userSession, query, userID, sessionID, refreshUUID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return entities.UserSession{}, dbErrors.DBErrNotFound
+		}
+		return entities.UserSession{}, fmt.Errorf("[%s|FindOneBySessionIDAndRefreshUUID] %s: %w", usSnRN, errExecQuery, err)
 	}
 
 	return userSession, nil
