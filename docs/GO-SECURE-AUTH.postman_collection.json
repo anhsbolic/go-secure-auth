@@ -1,0 +1,800 @@
+{
+	"info": {
+		"_postman_id": "5ccd110a-84e9-4921-a773-727ee3682ca4",
+		"name": "GO-SECURE-AUTH",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2575881",
+		"_collection_link": "https://speeding-equinox-308208.postman.co/workspace/SURECO~77868bff-d4d9-45ff-9a13-31160c151d43/collection/2575881-5ccd110a-84e9-4921-a773-727ee3682ca4?action=share&source=collection_link&creator=2575881"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7071/health-check",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"health-check"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7071/health-check",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"health-check"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 07:54:45 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "56"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "298"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "17"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Service is Running Properly\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"John Doe\",\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"John Doe\",\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7071/auth/register",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 07:55:15 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "224"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "299"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "30"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": \"00f10416-19d3-41a9-bf57-bd03f5d9270c\",\n        \"username\": \"John Doe\",\n        \"email\": \"john_doe@gmail.com\",\n        \"status\": \"inactive\",\n        \"registered_at\": \"2025-01-06T14:55:11.355789+07:00\"\n    },\n    \"message\": \" has been registered\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Verify Email",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7071/auth/verify-email?email=john_doe@gmail.com&token=499f93877a30dd3a4503eb88cace9360ba06499391bc65befbe65a977613d18db402af4c947a8c6fa71a5e7145fd0729781331e846504d3dd492276e85a80000",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"verify-email"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "john_doe@gmail.com"
+						},
+						{
+							"key": "token",
+							"value": "499f93877a30dd3a4503eb88cace9360ba06499391bc65befbe65a977613d18db402af4c947a8c6fa71a5e7145fd0729781331e846504d3dd492276e85a80000"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7071/auth/verify-email?email=john_doe@gmail.com&token=499f93877a30dd3a4503eb88cace9360ba06499391bc65befbe65a977613d18db402af4c947a8c6fa71a5e7145fd0729781331e846504d3dd492276e85a80000",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"verify-email"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "john_doe@gmail.com"
+								},
+								{
+									"key": "token",
+									"value": "499f93877a30dd3a4503eb88cace9360ba06499391bc65befbe65a977613d18db402af4c947a8c6fa71a5e7145fd0729781331e846504d3dd492276e85a80000"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 07:57:12 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "52"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "299"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "30"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Email has been verified\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Forgot Password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"anhsbolic@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/forgot-password",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"forgot-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reset Password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"anhsbolic@gmail.com\",\n    \"new_password\": \"Tes1234%^&*\",\n    \"reset_token\": \"275a1a416548730ea1b25fc6f7d711dfd5b0ee56553171f5888d00012e6046fb9bf56e3af281727ea62994daa2d3d3f29a9d92c3388d28b85e8fb0ff3dff0390\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/reset-password",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"reset-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7071/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 07:58:53 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "68"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "299"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "30"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"message\": \"Login success, please verify your login\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Login OTP Verification",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body",
+							"let response = pm.response.json();",
+							"",
+							"// Check if the response contains tokens",
+							"if (response.success && response.data) {",
+							"    pm.environment.set(\"access_token\", response.data.access_token);",
+							"    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+							"    console.log(\"Tokens saved successfully.\");",
+							"} else {",
+							"    console.warn(\"Tokens not found in the response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\",\n    \"otp\": \"439951\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/verify-login",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"verify-login"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"john_doe@gmail.com\",\n    \"password\": \"Tes1234%^&*\",\n    \"otp\": \"439951\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:7071/auth/verify-login",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"verify-login"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 08:02:38 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "817"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "299"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "30"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzYxNTE0NTMsImlhdCI6MTczNjE1MDU1MywiaXNzIjoic3VyZWNvLWNvcmUtc2VydiIsImp0aSI6IjRjODA2ZGJjLTgyMzctNDBkMC05MjJhLTFlYWViM2Q2OWQ1MSIsIm5iZiI6MTczNjE1MDU1Mywic2lkIjoiZDk1NTU3ZmMtZTViMC00NTA1LThkYWQtODRlZTQ3MDk3OGNkIiwic3ViIjoiOTg1ODMwNDUtZWJkOC00NWVkLWFmM2ItYjg1ZjRjM2FiOTMxIn0.8iRsKS6PNNjR9xdr7iLlTCPReWVJdryYhTZIooNo6Fo\",\n        \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzY3NTUzNTMsImlhdCI6MTczNjE1MDU1MywiaXNzIjoic3VyZWNvLWNvcmUtc2VydiIsImp0aSI6IjczNmY5NTQ4LWQ2YjktNDYwZS04MGJjLTdiOWNjNDM5MTI1MSIsIm5iZiI6MTczNjE1MDU1Mywic2lkIjoiZDk1NTU3ZmMtZTViMC00NTA1LThkYWQtODRlZTQ3MDk3OGNkIiwic3ViIjoiOTg1ODMwNDUtZWJkOC00NWVkLWFmM2ItYjg1ZjRjM2FiOTMxIn0.cd5ZoVGybu7gswtQkQlLPSjM-uAm5tnj57ICDEowaTg\"\n    },\n    \"message\": \"Login Verified\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Refresh Access Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body",
+							"let response = pm.response.json();",
+							"",
+							"// Check if the response contains tokens",
+							"if (response.success && response.data) {",
+							"    pm.environment.set(\"access_token\", response.data.access_token);",
+							"    pm.environment.set(\"refresh_token\", response.data.refresh_token);",
+							"    console.log(\"Tokens saved successfully.\");",
+							"} else {",
+							"    console.warn(\"Tokens not found in the response.\");",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{refresh_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7071/auth/refresh-access-token",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"refresh-access-token"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7071/auth/refresh-access-token",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"refresh-access-token"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 08:03:35 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "834"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "298"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "14"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzYxNTE1MTUsImlhdCI6MTczNjE1MDYxNSwiaXNzIjoic3VyZWNvLWNvcmUtc2VydiIsImp0aSI6IjBmMGMwZDMyLTc1ZGQtNDAxOC1hMzg1LTgyNjQ0ZDZkZTZhYiIsIm5iZiI6MTczNjE1MDYxNSwic2lkIjoiZDk1NTU3ZmMtZTViMC00NTA1LThkYWQtODRlZTQ3MDk3OGNkIiwic3ViIjoiOTg1ODMwNDUtZWJkOC00NWVkLWFmM2ItYjg1ZjRjM2FiOTMxIn0.XVL0BF64UZPzLFU0g0EiHrRrrwOqhUVFZzC1XnVVA9I\",\n        \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzY3NTU0MTUsImlhdCI6MTczNjE1MDYxNSwiaXNzIjoic3VyZWNvLWNvcmUtc2VydiIsImp0aSI6ImY2MGI1MTVkLTc2ZGQtNGVlOC1iN2Y4LTk1MzM0ZmYwY2EwZCIsIm5iZiI6MTczNjE1MDYxNSwic2lkIjoiZDk1NTU3ZmMtZTViMC00NTA1LThkYWQtODRlZTQ3MDk3OGNkIiwic3ViIjoiOTg1ODMwNDUtZWJkOC00NWVkLWFmM2ItYjg1ZjRjM2FiOTMxIn0.i7KvCvDo0cTQqQe-9qEahk_YMbVl7Us_FsulXpGQauo\"\n    },\n    \"message\": \"Access token has been refreshed\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Me (User Detail)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:7071/auth/me",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:7071/auth/me",
+							"host": [
+								"localhost"
+							],
+							"port": "7071",
+							"path": [
+								"auth",
+								"me"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Mon, 06 Jan 2025 08:03:20 GMT"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "179"
+						},
+						{
+							"key": "X-Ratelimit-Limit",
+							"value": "300"
+						},
+						{
+							"key": "X-Ratelimit-Remaining",
+							"value": "299"
+						},
+						{
+							"key": "X-Ratelimit-Reset",
+							"value": "30"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"data\": {\n        \"id\": \"00f10416-19d3-41a9-bf57-bd03f5d9270c\",\n        \"username\": \"John Doe\",\n        \"email\": \"john_doe@gmail.com\",\n        \"role\": \"member\",\n        \"status\": \"active\"\n    },\n    \"message\": \"User details\",\n    \"success\": true\n}"
+				}
+			]
+		},
+		{
+			"name": "Change Password",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"old_password\": \"Tes1234%^&*\",\n    \"new_password\": \"Tes1234%^&*S\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/change-password",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"change-password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/logout",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout All",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:7071/auth/logout-all",
+					"host": [
+						"localhost"
+					],
+					"port": "7071",
+					"path": [
+						"auth",
+						"logout-all"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
