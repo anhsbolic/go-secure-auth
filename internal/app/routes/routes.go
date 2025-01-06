@@ -11,7 +11,7 @@ func InitRoutes(f *fiber.App, db *sqlx.DB, validate *validator.Validate) {
 	f.Get("/health-check", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"success": true,
-			"message": "Core Service is Running Properly",
+			"message": "Service is Running Properly",
 		})
 	})
 
