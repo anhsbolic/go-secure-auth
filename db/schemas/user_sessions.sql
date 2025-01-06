@@ -34,7 +34,7 @@ ALTER TABLE
 -- --------------------------------------
 -- Composite unique index
 -- --------------------------------------
-CREATE UNIQUE INDEX "idx_usrssn_user_agent_ip" ON "user_sessions" USING btree ("user_agent_hash", "ip_address_hash");
+CREATE UNIQUE INDEX "idx_usrssn_user_agent_ip" ON "user_sessions" USING btree ("user_id", "user_agent_hash", "ip_address_hash");
 
 -- --------------------------------------
 -- Foreign key constraints
