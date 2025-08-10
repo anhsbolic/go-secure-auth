@@ -126,6 +126,19 @@ func (h serviceUserHandler) VerifyLogin(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	// use it for web apps
+	//ctx.Response().Header.Set("Set-Cookie",
+	//	fmt.Sprintf("refresh_token=%s; HttpOnly; Path=/; SameSite=Lax", result.RefreshToken),
+	//)
+	//return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+	//	"success": true,
+	//	"message": "Login Verified",
+	//	"data":   fiber.Map{
+	//		"access_token":  result.AccessToken,
+	//	},
+	//})
+
+	// user it for mobile apps
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"success": true,
 		"message": "Login Verified",
