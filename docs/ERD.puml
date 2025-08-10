@@ -1,0 +1,99 @@
+@startuml
+!theme plain
+hide circle
+skinparam linetype polyline
+
+entity "activity_attempts" as activity_attempts {
+  * id : uuid
+  user_id : uuid
+  activity : VARCHAR(255)
+  attempt_time : timestamptz(6)
+  success : BOOLEAN
+  description : TEXT
+  resolved_at : timestamptz(6)
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+entity "activity_logs" as activity_logs {
+  * id : uuid
+  user_id : uuid
+  user_agent : BYTEA
+  user_agent_hash : TEXT
+  ip_address : BYTEA
+  ip_address_hash : TEXT
+  activity : VARCHAR(255)
+  activity_time : timestamptz(6)
+  description : TEXT
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+entity "otp" as otp {
+  * id : uuid
+  user_id : uuid
+  otp_code : VARCHAR(6)
+  otp_type : VARCHAR(50)
+  expires_at : timestamptz(6)
+  used_at : timestamptz(6)
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+entity "tokens" as tokens {
+  * id : uuid
+  user_id : uuid
+  token_hash : TEXT
+  token_type : VARCHAR(50)
+  expires_at : timestamptz(6)
+  used_at : timestamptz(6)
+  revoked_at : timestamptz(6)
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+entity "user_sessions" as user_sessions {
+  * id : uuid
+  session_id : uuid
+  user_id : uuid
+  alias : uuid
+  access_uuid : uuid
+  refresh_uuid : uuid
+  user_agent : BYTEA
+  user_agent_hash : TEXT
+  ip_address : BYTEA
+  ip_address_hash : TEXT
+  expires_at : timestamptz(6)
+  revoked_at : timestamptz(6)
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+entity "users" as users {
+  * id : uuid
+  username : BYTEA
+  username_hash : TEXT
+  email : BYTEA
+  email_hash : TEXT
+  password_hash : TEXT
+  role : VARCHAR(20)
+  status : VARCHAR(20)
+  email_verified_at : timestamptz(6)
+  created_at : timestamptz(6)
+  updated_at : timestamptz(6)
+  deleted_at : timestamptz(6)
+}
+
+' === RELATIONS (many-to-one child -> users) ===
+activity_attempts }o--|| users : user_id -> users.id
+activity_logs     }o--|| users : user_id -> users.id
+otp               }o--|| users : user_id -> users.id
+tokens            }o--|| users : user_id -> users.id
+user_sessions     }o--|| users : user_id -> users.id
+
+@enduml
