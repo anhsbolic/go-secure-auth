@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  go-secure-auth-db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+      - POSTGRES_DB=go_secure_auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - go-secure-auth-pgdata:/var/lib/postgresql/data
+    networks:
+      - go-secure-auth-network
+
+volumes:
+  go-secure-auth-pgdata:
+
+networks:
+  go-secure-auth-network:
+    driver: bridge
